@@ -10,7 +10,16 @@ class Captain < ActiveRecord::Base
   end
 
   def self.talented_seamen
-    self.includes(boats: :classifications).group('captain.name').where("classifications.name = ? AND classifications.name = ?", 'Sailboat', 'Motorboat')
+
+    captain_ids = self.sailors.pluck(:id)&self.includes(boats: :classifications).where(:classifications => {:name => "Motorboat"}).uniq.pluck(:id)
+
+    self.all.where(:id => captain_ids)
+
+  end
+
+  def self.non_sailors
+    sailor_ids = self.sailors.pluck(:id)
+    self.where.not(:id => sailor_ids)
   end
 
 end
